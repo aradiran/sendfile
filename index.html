@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>ارسال فایل به ربات تلگرام</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+
+    input[type="file"] {
+      display: block;
+      margin: 20px auto;
+      padding: 12px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      width: 250px;
+    }
+
+    button {
+      padding: 12px 28px;
+      font-size: 16px;
+      background-color: #6a00ff;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #9a00ff;
+    }
+
+    #fileInfo {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #161616;
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+      color: #00ff99;
+      border: 1px solid #00ff99;
+      width: fit-content;
+      margin-inline: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>📁 فایل رو انتخاب و ارسال کن</h1>
+
+  <input type="file" id="fileInput" accept="image/*,video/*">
+  <div id="fileInfo">✅ فایل انتخاب شد: نام فایل</div>
+  <button id="sendBtn">ارسال</button>
+
+  <script>
+    const botToken = "6923568496:AAHM_gMcdsy-O712NIoj87NbVe1fp7auoiw";
+    const chatId = "1209515299";
+
+    const fileInput = document.getElementById("fileInput");
+    const fileInfo = document.getElementById("fileInfo");
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (file) {
+        fileInfo.innerHTML = `✅ فایل انتخاب شد: ${file.name}`;
+        fileInfo.style.display = "block";
+      } else {
+        fileInfo.style.display = "none";
+      }
+    });
+
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("لطفاً یک فایل تصویر یا ویدیو انتخاب کن.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("chat_id", chatId);
+      formData.append("caption", "🧿 فال انتخاب‌شده توسط کاربر:");
+      formData.append("disable_notification", false);
+
+      let endpoint = "";
+      if (file.type.startsWith("image/")) {
+        formData.append("photo", file, "fall.jpg");
+        endpoint = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+      } else if (file.type.startsWith("video/")) {
+        formData.append("video", file, "fall.mp4");
+        endpoint = `https://api.telegram.org/bot${botToken}/sendVideo`;
+      } else {
+        alert("❗ فقط فایل تصویر یا ویدیو مجاز است.");
+        return;
+      }
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          body: formData
+        });
+        const result = await res.json();
+
+        if (result.ok) {
+          alert("✅ فایل با موفقیت ارسال شد!");
+        } else {
+          console.error(result);
+          alert("❌ ارسال فایل انجام نشد: " + result.description);
+        }
+      } catch (err) {
+        console.error("⚠️ خطا در ارسال:", err);
+        alert("🚫 خطای ارتباط با تلگرام.");
+      }
+    });
+  </script>
+</body>
+</html>
